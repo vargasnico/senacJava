@@ -19,13 +19,10 @@ import model.Pessoa;
 public class PessoaDAO {
 
     public void cadastrarPessoaDAO(Pessoa pVO) {
-        try {
-            //buscar conexão com BD
-            Connection con = Conexao.getConexao();
-            //criar script sql de insert
-            String sql = "insert into pessoas values (null, ?,?,?,?)";
-            //criar espaço para executar script
-            PreparedStatement pst = con.prepareStatement(sql);
+        String sql = "insert into pessoas values (null, ?,?,?,?)";
+        // try-with-resources fecha a conexão e o statement mesmo se ocorrer erro.
+        try (Connection con = Conexao.getConexao();
+                PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, pVO.getNome());
             pst.setString(2, pVO.getCpf());
             pst.setString(3, pVO.getEndereco());
@@ -36,23 +33,14 @@ public class PessoaDAO {
                     + e.getMessage());
         }
     }//fim cadastroPessoa
-    
-    public ArrayList<Pessoa> getPessoas(){
+
+    public ArrayList<Pessoa> getPessoas() {
         ArrayList<Pessoa> pessoas = new ArrayList<>();
-        try {
-            Connection con = Conexao.getConexao();
-            String sql = "select * from pessoas";
-            PreparedStatement pst = con.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
-            while(rs.next()){
-                Pessoa p = new Pessoa();
-                // lado do java |x| lado do banco
-                p.setIdPessoa(rs.getInt("idPessoa"));
-                p.setNome(rs.getString("nome"));
-                p.setCpf(rs.getString("cpf"));
-                p.setEndereco(rs.getString("endereco"));
-                p.setTelefone(rs.getString("telefone"));
-                pessoas.add(p);
+        try (Connection con = Conexao.getConexao();
+                PreparedStatement pst = con.prepareStatement("select * from pessoas");
+                ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                pessoas.add(montarPessoa(rs));
             }
         } catch (SQLException e) {
             System.out.println("Erro ao listar pessoas.\n"
@@ -60,22 +48,16 @@ public class PessoaDAO {
         }
         return pessoas;
     }
-    
-    public Pessoa getPessoaByDoc(String cpf){
+
+    public Pessoa getPessoaByDoc(String cpf) {
         Pessoa p = new Pessoa();
-        try {
-            Connection con = Conexao.getConexao();
-            String sql = "select * from pessoas where cpf = ?";
-            PreparedStatement pst = con.prepareStatement(sql);
+        try (Connection con = Conexao.getConexao();
+                PreparedStatement pst = con.prepareStatement("select * from pessoas where cpf = ?")) {
             pst.setString(1, cpf);
-            ResultSet rs = pst.executeQuery();
-            while(rs.next()){
-                // lado do java |x| lado do banco
-                p.setIdPessoa(rs.getInt("idPessoa"));
-                p.setNome(rs.getString("nome"));
-                p.setCpf(rs.getString("cpf"));
-                p.setEndereco(rs.getString("endereco"));
-                p.setTelefone(rs.getString("telefone"));
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    p = montarPessoa(rs);
+                }
             }
         } catch (SQLException e) {
             System.out.println("Erro ao buscar CPF.\n"
@@ -83,13 +65,12 @@ public class PessoaDAO {
         }
         return p;
     }
-    
-    public void atualizarPessoaDAO(Pessoa pVO){
-        try {
-            Connection con = Conexao.getConexao();
-            String sql = "update pessoas set nome = ?, endereco = ?, telefone = ?"
-                    + " where cpf = ?";
-            PreparedStatement pst = con.prepareStatement(sql);
+
+    public void atualizarPessoaDAO(Pessoa pVO) {
+        String sql = "update pessoas set nome = ?, endereco = ?, telefone = ?"
+                + " where cpf = ?";
+        try (Connection con = Conexao.getConexao();
+                PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, pVO.getNome());
             pst.setString(2, pVO.getEndereco());
             pst.setString(3, pVO.getTelefone());
@@ -100,12 +81,10 @@ public class PessoaDAO {
                     + e.getMessage());
         }
     }
-    
-    public void deletarPessoaDAO(String cpf){
-        try {
-            Connection con = Conexao.getConexao();
-            String sql = "delete from pessoas where cpf = ?";
-            PreparedStatement pst = con.prepareStatement(sql);
+
+    public void deletarPessoaDAO(String cpf) {
+        try (Connection con = Conexao.getConexao();
+                PreparedStatement pst = con.prepareStatement("delete from pessoas where cpf = ?")) {
             pst.setString(1, cpf);
             pst.executeUpdate();
         } catch (SQLException e) {
@@ -113,5 +92,16 @@ public class PessoaDAO {
                     + e.getMessage());
         }
     }
-    
+
+    private Pessoa montarPessoa(ResultSet rs) throws SQLException {
+        // lado do java |x| lado do banco
+        Pessoa p = new Pessoa();
+        p.setIdPessoa(rs.getInt("idPessoa"));
+        p.setNome(rs.getString("nome"));
+        p.setCpf(rs.getString("cpf"));
+        p.setEndereco(rs.getString("endereco"));
+        p.setTelefone(rs.getString("telefone"));
+        return p;
+    }
+
 }
