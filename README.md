@@ -1,35 +1,35 @@
-# Cadastro de Carros — Java
+# Car Registry — Java
 
-Aplicação desktop em Java Swing para cadastrar pessoas e seus carros, com persistência em MySQL. Foi desenvolvida nas aulas de Java do curso técnico em Tecnologia da Informação do Senac Tech (2022–2023).
+Java Swing desktop application for registering people and their cars, backed by MySQL. It was built during the Java classes of the Information Technology technical course at Senac Tech (2022–2023).
 
-## Origem
+## Origin
 
-O projeto foi desenvolvido em aula, sobre a base apresentada pelo professor (por isso as classes originais têm `@author jbferraz`). Ele mostra os conceitos estudados na disciplina:
+The project was developed in class on top of the base provided by the instructor (which is why the original classes are tagged `@author jbferraz`). It demonstrates the concepts covered in the course:
 
-- Orientação a objetos com modelos `Pessoa` e `Carro`
-- Arquitetura em camadas: **view** (Swing) → **serviços** → **DAO** → MySQL
-- Padrões **DAO** e **Factory**
-- JDBC com `PreparedStatement`
-- Validação de CPF (dígitos verificadores), placa e anos do carro
+- Object-oriented programming with `Pessoa` (person) and `Carro` (car) models
+- Layered architecture: **view** (Swing) → **services** → **DAO** → MySQL
+- **DAO** and **Factory** patterns
+- JDBC with `PreparedStatement`
+- Validation of CPF (Brazilian taxpayer ID check digits), license plates and car years
 
-## Revisão em 2026
+## 2026 review
 
-Já na graduação em Engenharia de Software, revisei o projeto:
+Now a Software Engineering undergraduate, I revisited the project:
 
-| Antes | Depois |
+| Before | After |
 | --- | --- |
-| Conexões com o banco abertas e nunca fechadas | `try-with-resources` em todos os DAOs |
-| Listar carros fazia uma consulta extra por carro para buscar o proprietário (N+1) | Uma única consulta com `JOIN` |
-| Build pelo NetBeans (Ant), com o driver do MySQL em um `.jar` versionado | Maven, com o driver como dependência e `.jar` executável |
-| Usuário e senha do banco fixos no código | Variáveis de ambiente (`DB_URL`, `DB_USER`, `DB_PASSWORD`) |
-| Sem forma simples de subir o banco | MySQL via Docker Compose, inicializado pelo script SQL |
-| Arquivos compilados e configurações locais no repositório | Removidos e ignorados no `.gitignore` |
+| Database connections opened and never closed | `try-with-resources` in every DAO |
+| Listing cars ran an extra query per car to fetch its owner (N+1) | A single query with a `JOIN` |
+| NetBeans (Ant) build, with the MySQL driver committed as a `.jar` | Maven, with the driver as a dependency and an executable `.jar` |
+| Database user and password hardcoded | Environment variables (`DB_URL`, `DB_USER`, `DB_PASSWORD`) |
+| No easy way to start the database | MySQL via Docker Compose, initialized from the SQL script |
+| Compiled files and local settings committed | Removed and ignored in `.gitignore` |
 
-Cada mudança está em um commit separado.
+Each change is in a separate commit.
 
-## Como rodar
+## Running
 
-Requer Java 21+, Maven e Docker.
+Requires Java 21+, Maven and Docker.
 
 ```sh
 cd cadastro-carros
@@ -37,24 +37,24 @@ docker compose up -d
 mvn package
 ```
 
-Depois, com a senha do banco do Compose:
+Then, using the Compose database password:
 
 ```sh
 DB_PASSWORD=root java -jar target/cadastro-carros-1.0.0.jar
 ```
 
-No PowerShell, defina a variável antes com `$env:DB_PASSWORD="root"`. O projeto também abre no NetBeans como projeto Maven, incluindo o editor visual das telas (`.form`).
+In PowerShell, set the variable first with `$env:DB_PASSWORD="root"`. The project also opens in NetBeans as a Maven project, including the visual form editor (`.form` files).
 
-## Estrutura
+## Structure
 
-| Caminho | Conteúdo |
+| Path | Contents |
 | --- | --- |
-| `view/` | Telas Swing (principal, pessoas e carros) |
-| `controller/` | Listas em memória da versão anterior, em console (antes do banco) |
-| `servicos/` | Regras de negócio entre telas e DAOs |
-| `dao/` | Acesso ao banco com JDBC |
-| `model/` | Classes `Pessoa` e `Carro` |
-| `util/` | Validadores de CPF, placa e ano |
-| `database/carro.sql` | Criação do banco e das tabelas |
+| `view/` | Swing screens (main, people and cars) |
+| `controller/` | In-memory lists from the earlier console version (before the database) |
+| `servicos/` | Business logic between screens and DAOs |
+| `dao/` | Database access with JDBC |
+| `model/` | `Pessoa` and `Carro` classes |
+| `util/` | CPF, license plate and year validators |
+| `database/carro.sql` | Database and table creation |
 
-Os pacotes ficam em `cadastro-carros/src/main/java/`.
+The packages live in `cadastro-carros/src/main/java/`. The code itself (class names, UI and messages) is in Portuguese.
