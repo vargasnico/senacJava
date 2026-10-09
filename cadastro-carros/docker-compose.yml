@@ -1,0 +1,18 @@
+# Sobe apenas o MySQL; a aplicação Swing roda na máquina local (mvn package + java -jar).
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/carro.sql:/docker-entrypoint-initdb.d/carro.sql:ro
+      - dados:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  dados:
